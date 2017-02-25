@@ -27,13 +27,18 @@ export default class Table{
     }
     
     let row = this.tbody.insertRow();
+    if (obj.attributes) {
+      for (let key in obj.attributes) {
+        row.setAttribute(`${key}`, obj.attributes[key]);
+      }
+    }
+    
     this._config.classes.forEach(function(value){
       let cell = document.createElement('TD');
       cell.className = value;
-      obj[value] ? cell.innerText = obj[value] : cell.innerText = '';
+      cell.innerText = obj[value] ? obj[value] : cell.innerText = '';
       row.appendChild(cell);
     })
-
     return row;
   }
 
@@ -45,7 +50,7 @@ export default class Table{
     this._config.classes.forEach(function(value){
       let cell = document.createElement('TH');
       cell.className = value;
-      self._config.colName[value] ? cell.innerText = self._config.colName[value] : cell.innerText = '';
+      cell.innerText = self._config.colName[value] ? self._config.colName[value] : cell.innerText = '';
       row.appendChild(cell);
     })
 

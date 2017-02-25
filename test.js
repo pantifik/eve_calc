@@ -1,10 +1,7 @@
 'use strict'
 
-import {Item} from './frontEnd/item.js';
 import Table from './frontEnd/table.js';
-import {getName} from './frontEnd/inside/requestInside.js'
-
-
+import {createItemStorage, Item} from './frontEnd/item.js';
 
 document.addEventListener('DOMContentLoaded', function() {
   let calc = document.getElementById('calc').addEventListener('click', buttonClick);
@@ -13,9 +10,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if ( !event.target.tagName === 'BUTTON' ) return;
     calculate(+event.target.name);
   }
-  
 
   function calculate(idItem) {
+
     let tableConfig = {
                         parent: document.getElementById('result'),
                         classes: [
@@ -38,11 +35,31 @@ document.addEventListener('DOMContentLoaded', function() {
     item.state
       .then(show)
       .catch( err => console.error(new Error(err)) );
-    
 
     function show(item) {
-          
-          table.show(table.addRow(calculateReaction(item)));
+      let components = item.getComponents();
+      let res = calculateReaction(item).map(function(val) {
+        if (components[val.id]) {
+          val.attributes = {
+            'data-itemId': val.id
+          };
+        }
+        return val;
+      });
+      table.show(table.addRow(res));
+      
+      table.tbody.addEventListener('click', function(event) {
+        let target = event.target;
+        let itemId;
+        while (target != this) {
+          if (target.tagName == 'TR') {
+          itemId = +target.getAttribute('data-itemId');
+          calculate(itemId);
+          return;
+          }
+          target = target.parentNode;
+        }
+      });
     }
 
     function calculateReaction (item) {
@@ -51,14 +68,17 @@ document.addEventListener('DOMContentLoaded', function() {
           productionCost = 0;
 
       rows.push({
+                  id:           item.id,
                   name:         item.name,
                   quantity:     item.quantity, 
                   medianPrice:  item.medianBuy
                 }
       );
+
       for (let key in item.components) {
         cost = item.components[key].medianBuy * item.components[key].quantity;
         rows.push({
+                   id:              key,
                    name:            item.components[key].name,
                    quantity:        item.components[key].quantity,
                    medianPrice:     item.components[key].medianBuy,

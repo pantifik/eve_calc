@@ -3,15 +3,16 @@
 import {getItem}    from "./inside/requestInside.js";
 import {getPrice}   from './outside/requestOutside.js';
 
+let itemStorage = {};
 
 export class Item {
   constructor(id) {
+    if (itemStorage[id]) return itemStorage[id];
     this.id = id;
 
     let self = this;
     
     this.state = new Promise(function(resolve, reject) {
-
       getItem(id, 'itemId')
       .then(res =>  {
                       return new Promise(function(resolvePrice, rejectPrice) {
@@ -37,21 +38,19 @@ export class Item {
         delete res[id];
         self.components = res;
         resolve(self);
+        itemStorage[id] = self;
       })
       .catch(err => reject(new Error(err)));
     });
-  }
-                      
-
-  getMedianPrice() {
-
-  };
+  } 
 
   getComponents() {
+    let components = {};
       for (var key in this.components) {
-        this.components[key] = new Item(+key);
+        components[key] = itemStorage[key] ? itemStorage[key] : new Item(+key);
       }
-    return this.components;
+      
+    return components;
   }
 };
 
