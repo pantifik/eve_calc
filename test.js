@@ -1,17 +1,21 @@
 'use strict'
 
-import Table from './frontEnd/table.js';
-import {createItemStorage, Item} from './frontEnd/item.js';
+/*import Table from './frontEnd/table.js';
+import {createItemStorage, Item} from './frontEnd/item.js';*/
+import Calculator from './frontEnd/calculator.js';
 
 document.addEventListener('DOMContentLoaded', function() {
+  let a = new Calculator();
+  
   let calc = document.getElementById('calc').addEventListener('click', buttonClick);
 
   function buttonClick(event) {
     if ( !event.target.tagName === 'BUTTON' ) return;
-    calculate(+event.target.name);
+    a. calculate(+event.target.name);
   }
 
-  function calculate(idItem) {
+  
+  /*function calculate(idItem) {
 
     let tableConfig = {
                         parent: document.getElementById('result'),
@@ -23,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         ],
                         colName: {
                           name:             'Название',
-                          quantity:         'Колличество',
+                          quantity:         'Количество',
                           medianPrice:      'Средняя цена',
                           productionCost:   'Стоимость Производства'
                         }
@@ -54,7 +58,8 @@ document.addEventListener('DOMContentLoaded', function() {
         while (target != this) {
           if (target.tagName == 'TR') {
           itemId = +target.getAttribute('data-itemId');
-          calculate(itemId);
+          let a = calculate(itemId);
+          console.log(a);
           return;
           }
           target = target.parentNode;
@@ -88,10 +93,12 @@ document.addEventListener('DOMContentLoaded', function() {
         productionCost += cost;
       }
 
-      rows[0].productionCost = productionCost;
+      rows[0].productionCost = +( (productionCost/item.quantity).toFixed(2) );
 
       return rows;
     }
-  }
+
+    return 1;
+  }*/
 
 })

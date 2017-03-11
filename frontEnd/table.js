@@ -42,10 +42,8 @@ export default class Table{
     return row;
   }
 
-
   addHeader() {
     let self = this;
-
     let row = this.thead.insertRow();
     this._config.classes.forEach(function(value){
       let cell = document.createElement('TH');
@@ -56,7 +54,6 @@ export default class Table{
 
     return row;
   }
-
 
   show() {
     this.addHeader.call(this);
