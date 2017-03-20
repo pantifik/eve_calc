@@ -25,34 +25,43 @@ export default class Calculator{
   }
 
   calculate(idItem) {
-    let self        = this;
-        this.item   = new Item(idItem);
-        this.table  = new Table(this.config.table);
+    let self   = this,
+        item   = new Item(idItem),
+        table  = new Table(this.config.table);
 
-    this.item.state
-      .then(calculateReaction)
-      .then(rows => {
-        let components = this.item.getComponents();
+    let result = new Promise(function(resolve, reject) {
+      //todo reject
+      item.state
+        .then(calculateReaction)
+        .then(rows => {
+          let components = item.getComponents();
 
-        rows = rows.map(function(val) {
-          if (components[val.id]) {
-            val.attributes = {
-              'data-itemId': val.id
-            };
-          }
-          return val;
-        });
+          rows = rows.map(function(val) {
+            if (components[val.id]) {
+              val.attributes = {
+                'data-itemId': val.id
+              };
+            }
+            return val;
+          });
 
-        this.table.addRow(rows);
-        this.table.show();
-        return rows;
-      })
-      .then(rows => {
-        this.table.tbody.addEventListener('click', addCalculation);
-      })
-      .catch( err => console.error(new Error(err)) );
+          table.addRow(rows);
+          table.show();
+          resolve(rows[0]);
+          return rows;
+        })
+        .then(rows => {
+          table.tbody.addEventListener('click', function(event) {
+            let componentPrice = addCalculation(event, table);
+            //todo update react cost
+          });
+        })
+        .catch( err => console.error(new Error(err)) );
+      });
 
-    function calculateReaction (item) {
+    return result;
+
+    function calculateReaction(item) {
       let rows            = [],
           cost            = 0,
           productionCost  = 0;
@@ -83,23 +92,38 @@ export default class Calculator{
       return rows;
     }
 
-    function addCalculation(event) {
-      self.calculate(getTargetItemId(event));
+    function addCalculation(event, parentTable) {
+      let targetTR = getTR(event),
+          result = self.calculate(+targetTR.getAttribute('data-itemId'));
 
-      function getTargetItemId(event) {
-        let target = event.target
+      result
+        .then(res => {
+          updateResult(targetTR, res, parentTable);
+        })
+        .catch( err => console.error(new Error(err)) );
+      return result;
+
+      function getTR(event) {
+        let target = event.target;
 
         while (target != this) {
           if (target.tagName == 'TR') {
-          return +target.getAttribute('data-itemId');
+          return target;
           }
           target = target.parentNode;
         }
       }
     }
 
-    function updateResult(tableRow) {
-    //todo
+    function updateResult(tableRow, res, parentTable) {
+      let cost = 0;
+      tableRow.lastChild.innerText = res.productionCost;
+      let allCost = parentTable.tbody.querySelectorAll('.productionCost');
+      for (let i = 1; i < allCost.length; i++) {
+        cost += +allCost[i].innerText;
+        console.log(+allCost[i].innerText);
+      }
+      allCost[0].innerText = cost;
     }
   }
 
